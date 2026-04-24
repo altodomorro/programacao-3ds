@@ -1,112 +1,49 @@
-# Exemplo de game loop no Python para jogo da forca
-palavra_secreta = "girafa"
-letras_acertadas = ["_", "_", "_", "_", "_", "_"]
-tentativas = 6
+import random
 
-while tentativas > 0 and "_" in letras_acertadas:
-    palpite = input("Digite uma letra: ").lower()
+def jogo_adivinhacao():
+    numero_secreto = random.randint(1, 10)
+    tentativas = 0
+    max_tentativas = 5
 
-    if palpite in palavra_secreta:
-        index = 0
-        for letra in palavra_secreta:
-            if palpite == letra:
-                letras_acertadas[index] = letra
-            index += 1
+    print("🎲 Bem-vindo ao jogo de adivinhação!")
+    print("Tente adivinhar o número que estou pensando, entre 1 e 10.")
+    print(f"Você tem {max_tentativas} tentativas.\n")
+
+    while tentativas < max_tentativas:
+        try:
+            palpite = int(input("Digite seu palpite: "))
+        except ValueError:
+            print("⚠️ Entrada inválida! Digite apenas números inteiros.")
+            continue
+
+        tentativas += 1
+
+        # Comentários narrativos
+        if tentativas == 1:
+            print("📢 Primeira tentativa! Vamos ver se você tem sorte logo de cara...")
+        elif tentativas == max_tentativas - 1:
+            print("😬 Penúltima chance! Concentre-se!")
+        elif tentativas == max_tentativas:
+            print("🔥 Última tentativa! É tudo ou nada!")
+
+        # Verifica o palpite
+        if palpite == numero_secreto:
+            print(f"🎉 Parabéns! Você acertou o número em {tentativas} tentativa(s).")
+            print("👏 Que desempenho incrível!")
+            break
+        elif palpite < numero_secreto:
+            print("🔼 Quase lá! Tente um número maior.")
+        else:
+            print("🔽 Quase lá! Tente um número menor.")
+
+        if tentativas < max_tentativas:
+            print(f"Você ainda tem {max_tentativas - tentativas} tentativa(s).\n")
+
     else:
-        tentativas -= 1
-        print(f"Você tem {tentativas} tentativas restantes.")
-    
-    print(" ".join(letras_acertadas))
+        print(f"😢 Infelizmente, você não acertou. O número era {numero_secreto}.")
+        print("🎤 Comentário final: foi uma boa disputa, mas o número te venceu desta vez!")
+        print("Fim do jogo!")
 
-if "_" not in letras_acertadas:
-    print("Parabéns, você ganhou!")
-else:
-    print("Que pena, você perdeu. A palavra era:", palavra_secreta)
-
-""" Este código ilustra um game loop básico para o jogo da forca, 
-onde o jogador tem um número limitado de tentativas para adivinhar
-a palavra secreta. O loop continua até que o jogador acerte a 
-palavra ou esgote suas tentativas. """
-
-# Declara as variáveis numéricas
-num1 = float(input("Digite o primeiro número: "))
-num2 = float(input("Digite o segundo número: "))
-
-# Configura a lógica das operações
-soma = num1 + num2
-subtracao = num1 - num2
-
-# Exibe os resultados
-print(f"Soma: {soma}")
-print(f"Subtração: {subtracao}")
-
-# Solicita ao usuário que digite um número inteiro
-numero = int(input("__________________________: "))
-
-# Verifica se o número é par
-if numero % 2 == 0:
-    # Se for par, imprime a mensagem
-    print(f"{numero} é par.")
-else:
-    # Se for ímpar, imprime a mensagem
-    print(f"{numero} é ______________.")
-
-# Solicita temperatura em graus Celsius ao usuário
-celsius = float(input("Digite a temperatura em graus Celsius: "))
-
-# Calcula a temperatura em graus Fahrenheit
-fahrenheit = (celsius * 9/5) + 32
-
-# Solicita um número ao usuário
-numero = float(input("__________________________"))
-
-# Verifica se o número é positivo
-if numero > 0:
-    # Se for positivo, imprime a mensagem
-    print("O número é _________________.")
-# Verifica se o número é negativo
-elif numero < 0:
-    # Se for negativo, imprime a mensagem
-    print("_______________________________________")
-# Se não for positivo nem negativo, é zero
-else:
-    # Imprime a mensagem para zero
-    print("__________________________________")
-
-# Solicita o peso do usuário em kg
-peso = float(input("Digite o peso em kg: "))
-
-# Solicita a altura do usuário em metros
-altura = float(input("Digite a altura em metros: "))
-
-# Calcula o IMC (Índice de Massa Corporal)
-imc = peso / (altura ** 2)
-
-# Classifica o IMC e exibe a mensagem
-___ imc < 18.5:
-    print("Abaixo do peso.")
-_______ imc < 25:
-    print("Peso normal.")
-_______ imc < 30:
-    print("Sobrepeso.")
-_____:
-    print("Obesidade.")
-
-# Solicita letra ao usuário e converte em minúscula
-______ = input("Digite uma letra: ").lower()
-
-# Verifica se a letra é uma vogal
-if letra in "aeiou":
-    # Se for vogal, imprime "Vogal."
-    print("______")
-else:
-    # Se não for vogal, imprime "Consoante."
-    print("___________")
-
-# Solicita o preço do produto
-preco = float(input("Digite o preço do produto: "))
-
-# Solicita o código de desconto
-codigo = input("Digite o código de desconto (A, B ou C): ").upper()
-
-# Define os descontos correspond
+# Executa o jogo
+if __name__ == "__main__":
+    jogo_adivinhacao()
