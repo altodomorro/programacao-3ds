@@ -1,0 +1,599 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro de Clientes</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 25px;
+            background: #eef2f7;
+            color: #263238;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: auto;
+        }
+
+        header {
+            background: #173b67;
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0000000c;
+        }
+
+        .campos {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd4df;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 2px solid #91bdf5;
+            border-color: #3478c9;
+        }
+
+        .botoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 7px;
+            padding: 11px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .principal {
+            background: #1769aa;
+            color: white;
+        }
+
+        .secundario {
+            background: #e6edf5;
+            color: #263b53;
+        }
+
+        .perigo {
+            background: #c0392b;
+            color: white;
+        }
+
+        button:hover {
+            filter: brightness(0.94);
+        }
+
+        .pesquisa {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pesquisa input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contador {
+            color: #5d6b7a;
+            margin-bottom: 12px;
+        }
+
+        .cliente {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .cliente:hover {
+            background: #f0f6ff;
+            border-color: #8bb9ef;
+        }
+
+        .cliente.selecionado {
+            background: #e5f0ff;
+            border-color: #1769aa;
+        }
+
+        .dados {
+            overflow-wrap: anywhere;
+        }
+
+        .dados strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .dados small {
+            color: #5d6b7a;
+        }
+
+        .vazio {
+            padding: 20px 0;
+            color: #6c7a89;
+            text-align: center;
+        }
+
+        #mensagem {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .campos {
+                grid-template-columns: 1fr;
+            }
+
+            .pesquisa {
+                flex-direction: column;
+            }
+
+            .cliente {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <header>
+        <h1>Cadastro de Clientes</h1>
+        <p>Gerencie, pesquise e salve seus clientes em formato JSON.</p>
+    </header>
+
+    <section class="card">
+        <h2>Dados do cliente</h2>
+
+        <form id="formCliente">
+            <div class="campos">
+                <div>
+                    <label for="id">Código (ID)</label>
+                    <input id="id" placeholder="Automático" readonly>
+                </div>
+
+                <div>
+                    <label for="nome">Nome completo</label>
+                    <input id="nome" maxlength="100"
+                           placeholder="Digite o nome do cliente" required>
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label for="email">E-mail</label>
+                    <input id="email" type="email" maxlength="150"
+                           placeholder="cliente@exemplo.com" required>
+                </div>
+            </div>
+
+            <div class="botoes">
+                <button type="submit" class="principal" id="btnCadastrar">
+                    Cadastrar cliente
+                </button>
+
+                <button type="button" class="secundario"
+                        onclick="novo_cliente()">
+                    Novo / Limpar
+                </button>
+
+                <button type="button" class="secundario"
+                        onclick="excluir_cliente()">
+                    Excluir selecionado
+                </button>
+
+                <button type="button" class="principal"
+                        onclick="salvar_cliente()">
+                    Exportar clientes.json
+                </button>
+
+                <button type="button" class="secundario"
+                        onclick="document.getElementById('arquivoJSON').click()">
+                    Importar JSON
+                </button>
+
+                <input type="file" id="arquivoJSON" accept=".json,application/json"
+                       hidden onchange="importar_cliente(event)">
+            </div>
+
+            <p id="mensagem" role="status" aria-live="polite"></p>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Pesquisar clientes</h2>
+
+        <div class="pesquisa">
+            <input id="busca"
+                   placeholder="Pesquise por nome ou código..."
+                   oninput="listar_clientes()">
+
+            <button class="secundario" onclick="limpar_busca()">
+                Limpar busca
+            </button>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Clientes cadastrados</h2>
+
+        <p class="contador" id="contador">Total: 0 clientes</p>
+
+        <div id="listaClientes"></div>
+    </section>
+
+</div>
+
+<script>
+    // Classe Cliente
+    class Cliente {
+        constructor(id, nome, email) {
+            this.id = Number(id);
+            this.nome = nome.trim();
+            this.email = email.trim();
+        }
+
+        toJSON() {
+            return {
+                id: this.id,
+                nome: this.nome,
+                email: this.email
+            };
+        }
+    }
+
+    // Dados em memória
+    let clientes = [];
+    let proximoId = 1;
+    let idSelecionado = null;
+
+    // Exibe mensagens para o usuário
+    function mostrar_mensagem(texto, erro = false) {
+        const elemento = document.getElementById("mensagem");
+        elemento.textContent = texto;
+        elemento.style.color = erro ? "#c0392b" : "#218838";
+    }
+
+    // Inclui um cliente ou atualiza o selecionado
+    function incluir_cliente(nome, email) {
+        nome = nome.trim();
+        email = email.trim();
+
+        if (!nome || !email) {
+            mostrar_mensagem("Preencha todos os campos.", true);
+            return false;
+        }
+
+        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailValido.test(email)) {
+            mostrar_mensagem("Digite um e-mail válido.", true);
+            return false;
+        }
+
+        // Impede e-mails duplicados em clientes diferentes
+        const duplicado = clientes.some(cliente =>
+            cliente.email.toLowerCase() === email.toLowerCase() &&
+            cliente.id !== idSelecionado
+        );
+
+        if (duplicado) {
+            mostrar_mensagem("Este e-mail já está cadastrado.", true);
+            return false;
+        }
+
+        if (idSelecionado !== null) {
+            const indice = clientes.findIndex(
+                cliente => cliente.id === idSelecionado
+            );
+
+            if (indice === -1) {
+                mostrar_mensagem("Cliente não encontrado.", true);
+                return false;
+            }
+
+            clientes[indice].nome = nome;
+            clientes[indice].email = email;
+
+            mostrar_mensagem("Cliente atualizado com sucesso!");
+        } else {
+            const cliente = new Cliente(proximoId++, nome, email);
+            clientes.push(cliente);
+
+            mostrar_mensagem("Cliente cadastrado com sucesso!");
+        }
+
+        novo_cliente(false);
+        listar_clientes();
+        return true;
+    }
+
+    // Salva os dados em um arquivo JSON para download
+    function salvar_cliente() {
+        const dados = JSON.stringify(clientes, null, 4);
+        const arquivo = new Blob([dados], {
+            type: "application/json;charset=utf-8"
+        });
+
+        const url = URL.createObjectURL(arquivo);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "clientes.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        mostrar_mensagem("Arquivo clientes.json exportado com sucesso!");
+    }
+
+    // Cadastro interativo de vários clientes
+    function cadastrar_clientes() {
+        while (true) {
+            const nome = prompt("Nome do cliente:");
+            if (nome === null) break;
+
+            const email = prompt("E-mail do cliente:");
+            if (email === null) break;
+
+            if (!incluir_cliente(nome, email)) {
+                alert(document.getElementById("mensagem").textContent);
+                break;
+            }
+
+            if (!confirm("Deseja cadastrar outro cliente?")) break;
+        }
+    }
+
+    // Lista todos ou filtra por nome e ID
+    function listar_clientes() {
+        const lista = document.getElementById("listaClientes");
+        const termo = document.getElementById("busca")
+            .value.trim().toLowerCase();
+
+        lista.replaceChildren();
+
+        const encontrados = clientes.filter(cliente =>
+            String(cliente.id).includes(termo) ||
+            cliente.nome.toLowerCase().includes(termo)
+        );
+
+        document.getElementById("contador").textContent =
+            encontrados.length + " cliente(s) encontrado(s) de " +
+            clientes.length + " cadastrado(s)";
+
+        if (encontrados.length === 0) {
+            const vazio = document.createElement("p");
+            vazio.className = "vazio";
+            vazio.textContent = clientes.length === 0
+                ? "Nenhum cliente cadastrado."
+                : "Nenhum cliente encontrado.";
+            lista.appendChild(vazio);
+            return;
+        }
+
+        encontrados.forEach(cliente => {
+            const item = document.createElement("div");
+            item.className = "cliente";
+
+            if (cliente.id === idSelecionado) {
+                item.classList.add("selecionado");
+            }
+
+            item.tabIndex = 0;
+            item.setAttribute("role", "button");
+            item.setAttribute("aria-label",
+                "Selecionar " + cliente.nome);
+
+            const dados = document.createElement("div");
+            dados.className = "dados";
+
+            const nome = document.createElement("strong");
+            nome.textContent = cliente.nome;
+
+            const email = document.createElement("small");
+            email.textContent =
+                "ID: " + cliente.id + " | " + cliente.email;
+
+            dados.append(nome, email);
+            item.appendChild(dados);
+
+            item.addEventListener("click", () => selecionar_cliente(cliente.id));
+
+            item.addEventListener("keydown", evento => {
+                if (evento.key === "Enter" || evento.key === " ") {
+                    evento.preventDefault();
+                    selecionar_cliente(cliente.id);
+                }
+            });
+
+            lista.appendChild(item);
+        });
+    }
+
+    // Preenche automaticamente o formulário
+    function selecionar_cliente(id) {
+        const cliente = clientes.find(item => item.id === id);
+        if (!cliente) return;
+
+        idSelecionado = cliente.id;
+
+        document.getElementById("id").value = cliente.id;
+        document.getElementById("nome").value = cliente.nome;
+        document.getElementById("email").value = cliente.email;
+        document.getElementById("btnCadastrar").textContent =
+            "Salvar alterações";
+
+        mostrar_mensagem("Cliente selecionado para edição.");
+        listar_clientes();
+    }
+
+    // Exclui o cliente selecionado
+    function excluir_cliente() {
+        if (idSelecionado === null) {
+            mostrar_mensagem("Selecione um cliente na lista.", true);
+            return;
+        }
+
+        const cliente = clientes.find(item => item.id === idSelecionado);
+
+        if (!confirm("Deseja excluir o cliente " + cliente.nome + "?")) {
+            return;
+        }
+
+        clientes = clientes.filter(item => item.id !== idSelecionado);
+
+        novo_cliente(false);
+        listar_clientes();
+        mostrar_mensagem("Cliente excluído. Exporte o JSON para salvar a alteração.");
+    }
+
+    // Limpa o formulário sem excluir dados
+    function novo_cliente(limparMensagem = true) {
+        document.getElementById("formCliente").reset();
+        document.getElementById("id").value = "";
+        document.getElementById("btnCadastrar").textContent =
+            "Cadastrar cliente";
+
+        idSelecionado = null;
+        listar_clientes();
+
+        if (limparMensagem) mostrar_mensagem("");
+    }
+
+    // Limpa o campo de pesquisa
+    function limpar_busca() {
+        document.getElementById("busca").value = "";
+        listar_clientes();
+    }
+
+    // Importa clientes de um arquivo JSON
+    async function importar_cliente(evento) {
+        const arquivo = evento.target.files[0];
+        if (!arquivo) return;
+
+        try {
+            const dados = JSON.parse(await arquivo.text());
+
+            if (!Array.isArray(dados)) {
+                throw new Error("O JSON deve conter uma lista de clientes.");
+            }
+
+            const importados = dados.map(item => {
+                if (
+                    !item ||
+                    !Number.isSafeInteger(Number(item.id)) ||
+                    Number(item.id) < 1 ||
+                    typeof item.nome !== "string" ||
+                    typeof item.email !== "string" ||
+                    !item.nome.trim() ||
+                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.email.trim())
+                ) {
+                    throw new Error("Existem dados inválidos no arquivo.");
+                }
+
+                return new Cliente(item.id, item.nome, item.email);
+            });
+
+            const ids = new Set(importados.map(c => c.id));
+            const emails = new Set(
+                importados.map(c => c.email.toLowerCase())
+            );
+
+            if (ids.size !== importados.length ||
+                emails.size !== importados.length) {
+                throw new Error("O arquivo contém IDs ou e-mails duplicados.");
+            }
+
+            if (!confirm(
+                "Importar " + importados.length +
+                " cliente(s)? Os dados atuais serão substituídos."
+            )) {
+                return;
+            }
+
+            clientes = importados;
+            proximoId = clientes.reduce(
+                (maior, c) => Math.max(maior, c.id), 0
+            ) + 1;
+
+            novo_cliente(false);
+            listar_clientes();
+            mostrar_mensagem("Arquivo JSON importado com sucesso!");
+
+        } catch (erro) {
+            mostrar_mensagem("Erro na importação: " + erro.message, true);
+        } finally {
+            evento.target.value = "";
+        }
+    }
+
+    // Envio do formulário
+    document.getElementById("formCliente")
+        .addEventListener("submit", evento => {
+            evento.preventDefault();
+
+            incluir_cliente(
+                document.getElementById("nome").value,
+                document.getElementById("email").value
+            );
+        });
+
+    // Inicialização: começa com a lista vazia.
+    // Não apaga arquivos existentes no computador.
+    listar_clientes();
+</script>
+</body>
+</html>
+```
